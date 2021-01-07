@@ -1,24 +1,25 @@
 package com.example.sunnyweather.ui.place;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sunnyweather.R;
 import com.example.sunnyweather.logic.model.Place;
+import com.example.sunnyweather.ui.weather.WeatherAcitvity;
 
 import java.util.List;
 
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.ViewHolder> {
-    private Fragment fragment;
+    private PlaceFragment fragment;
     private List<Place> placeList;
 
-    public PlaceAdapter(Fragment fragment, List<Place> placeList) {
+    public PlaceAdapter(PlaceFragment fragment, List<Place> placeList) {
         this.fragment = fragment;
         this.placeList = placeList;
     }
@@ -38,7 +39,19 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_item, parent, false);
-        return new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view);
+        holder.itemView.setOnClickListener(v -> {
+            int position = holder.getAdapterPosition();
+            Place place = placeList.get(position);
+            Intent intent = new Intent(v.getContext(), WeatherAcitvity.class);
+            intent.putExtra("location_lng", place.getLocation().getLng());
+            intent.putExtra("location_lat", place.getLocation().getLat());
+            intent.putExtra("place_name", place.getName());
+            fragment.getViewModel().savePlace(place);
+            fragment.startActivity(intent);
+            fragment.getActivity().finish();
+        });
+        return holder;
     }
 
     @Override
