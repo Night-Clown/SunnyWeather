@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sunnyweather.R;
@@ -43,13 +45,23 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(v -> {
             int position = holder.getAdapterPosition();
             Place place = placeList.get(position);
-            Intent intent = new Intent(v.getContext(), WeatherAcitvity.class);
-            intent.putExtra("location_lng", place.getLocation().getLng());
-            intent.putExtra("location_lat", place.getLocation().getLat());
-            intent.putExtra("place_name", place.getName());
+            FragmentActivity activity = fragment.getActivity();
+            if (activity instanceof WeatherAcitvity) {
+                DrawerLayout drawerLayout = activity.findViewById(R.id.drawerLayout);
+                drawerLayout.closeDrawers();
+                ((WeatherAcitvity) activity).getViewModel().setLocationLat(place.getLocation().getLat());
+                ((WeatherAcitvity) activity).getViewModel().setLocationLng(place.getLocation().getLng());
+                ((WeatherAcitvity) activity).getViewModel().setPlaceName(place.getName());
+                ((WeatherAcitvity) activity).refreshWeather();
+            } else {
+                Intent intent = new Intent(parent.getContext(), WeatherAcitvity.class);
+                intent.putExtra("location_lng", place.getLocation().getLng())
+                        .putExtra("location_lat", place.getLocation().getLat())
+                        .putExtra("place_name", place.getName());
+                activity.startActivity(intent);
+                activity.finish();
+            }
             fragment.getViewModel().savePlace(place);
-            fragment.startActivity(intent);
-            fragment.getActivity().finish();
         });
         return holder;
     }
